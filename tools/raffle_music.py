@@ -1,14 +1,14 @@
-"""Music for the Dashain Night raffle - the same Panche Baja synth as the film's trailer score
-(music/dashain_trailer.py), re-arranged as four cues the page schedules on the Web Audio clock around a draw:
+"""Music for the Diwali Night raffle - a festive Panche Baja-inspired synth arranged as four cues
+the page schedules on the Web Audio clock around a draw:
 
   groove    15.0 s  GO hit + accelerating tyamko roll (numbers speed up), then the full Panche Baja groove at 144 bpm,
-                    sahanai on the Malshree dhun: A1 (ends on Sa at 5.42 s, where the 10 s spin starts to slow), B2 hook,
+                    sahanai on the main festive motif: A1 (ends on Sa at 5.42 s, where the 10 s spin starts to slow), B2 hook,
                     A2, B1. The page cuts it wherever the spin starts slowing.
   sting      2.5 s  crash + damaha + low narsingha and a falling gliss: the wheel starts to slow.
   suspense   7.5 s  END-ALIGNED: tanpura + dark pad, damaha heartbeat, gated riser into a reverse crash that peaks
                     0.35 s before the end, then a breath of silence. The page starts it part-way in so its end lands
                     exactly on the winning number.
-  reveal    14.0 s  the winner: big hit, then the joyful half of the Malshree (B1 B2 B3) over the groove, its cadence
+  reveal    14.0 s  the winner: big hit, then the joyful second motif (B1 B2 B3) over the groove, its cadence
                     D C B -> Sa and a final hit.
 
   /Applications/Blender.app/Contents/Resources/5.2/python/bin/python3.13 tools/raffle_music.py
@@ -404,8 +404,8 @@ def whoosh(dur=0.55, vel=1.0):
     return s * np.sin(np.pi * t / dur) ** 2 * vel * 0.18
 
 
-def kite_swoosh(dur=0.95, vel=1.0):
-    """A paper kite rushing past the lens: an air whoosh plus the paper's fast flutter, loudest as it crosses."""
+def sparkler_swoosh(dur=0.95, vel=1.0):
+    """A festive sparkler sweep: an air whoosh plus a fast crackling flutter, loudest as it crosses."""
     n = int(dur * SR)
     t = np.arange(n) / SR
     env = np.sin(np.pi * t / dur) ** 3

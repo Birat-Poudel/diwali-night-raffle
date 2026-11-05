@@ -1,6 +1,6 @@
-/* Dashain Night raffle.
+/* Diwali celebration raffle.
    One fair (crypto) winner from the ticket range, revealed by a spin that speeds up fast, runs flat out, then slows
-   down to land on the winner - timed to the Panche Baja cues in audio-data.js on the Web Audio clock. */
+   down to land on the winner, timed to the festival music cues in audio-data.js on the Web Audio clock. */
 (() => {
   'use strict';
 
@@ -10,7 +10,6 @@
     mala: $('mala'),
     label: $('faceLabel'),
     number: $('winnerDisplay'),
-    nepali: $('winnerNepali'),
     countdown: $('countdown'),
     countdownValue: $('countdownValue'),
     draw: $('drawButton'),
@@ -29,8 +28,7 @@
     confetti: $('confettiLayer'),
   };
 
-  const STORE = 'dashain-raffle-v2';
-  const NEPALI_DIGITS = '०१२३४५६७८९';
+  const STORE = 'diwali-raffle-v1';
   const BEAT = 60 / 144;                              // the score's tempo
   const RAMP = 2 * BEAT;                              // the speed-up = the GO roll; the groove kicks in here
   const SLOW = { 6: 3.2, 10: 4.5, 15: 5.5, 20: 6.5 }; // seconds of slowing down, per spin time
@@ -40,9 +38,9 @@
 
   const state = { winners: [], hidden: false, muted: false, spinning: false };
   let run = null;
+  let fireworkTimer = 0;
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-  const toNepali = (s) => String(s).replace(/[0-9]/g, (d) => NEPALI_DIGITS[d]);
 
   // ---------------------------------------------------------------- settings that survive a reload
   function save() {
@@ -355,7 +353,7 @@
     return digits;
   }
 
-  function showNumber(value, nepali = true) {
+  function showNumber(value) {
     const s = String(value);
     const spans = ui.number.children;
     if (spans.length !== s.length) {
@@ -369,12 +367,11 @@
     for (let i = 0; i < s.length; i += 1) {
       if (spans[i].textContent !== s[i]) spans[i].textContent = s[i];
     }
-    ui.nepali.textContent = nepali ? toNepali(s) : '';
   }
 
   function showIdle() {
     const r = readRange();
-    showNumber('?'.repeat(r.error ? 5 : sizeFor(r)), false);
+    showNumber('?'.repeat(r.error ? 5 : sizeFor(r)));
     ui.label.textContent = 'Winning Number';
     ui.medallion.classList.remove('revealed', 'spinning', 'whirl');
     progress(0);
@@ -403,7 +400,7 @@
       const li = document.createElement('li');
       const rank = document.createElement('span');
       rank.className = 'rank';
-      rank.textContent = `#${i + 1}`;
+      rank.textContent = String(i + 1);
       li.append(rank, document.createTextNode(String(n)));
       if (fresh && i === state.winners.length - 1) li.className = 'new';
       ui.winners.appendChild(li);
@@ -440,6 +437,22 @@
     });
   }
 
+  function stopFireworkFinale() {
+    clearTimeout(fireworkTimer);
+    fireworkTimer = 0;
+    document.body.classList.remove('firework-finale');
+  }
+
+  function launchFireworkFinale() {
+    stopFireworkFinale();
+    void document.body.offsetWidth;
+    document.body.classList.add('firework-finale');
+    fireworkTimer = setTimeout(() => {
+      document.body.classList.remove('firework-finale');
+      fireworkTimer = 0;
+    }, 6500);
+  }
+
   // ---------------------------------------------------------------- draw -> spin -> reveal
   async function draw() {
     if (state.spinning) return;
@@ -459,6 +472,7 @@
     setBusy(true);
     setHidden(true);
     clearConfetti();
+    stopFireworkFinale();
     sizeFor(r);
     ui.medallion.classList.remove('revealed', 'whirl');
     ui.label.textContent = 'Drawing…';
@@ -547,10 +561,11 @@
     ui.medallion.classList.remove('spinning', 'whirl');
     void ui.medallion.offsetWidth; // restart the reveal animations
     ui.medallion.classList.add('revealed');
-    ui.label.textContent = `Winner #${state.winners.length}`;
-    setStatus(`Congratulations, ticket ${winner}! शुभ विजया दशमी!`, 'win');
+    ui.label.textContent = `Winner ${state.winners.length}`;
+    setStatus(`Congratulations, ticket ${winner}!`, 'win');
     renderWinners(true);
     launchConfetti();
+    launchFireworkFinale();
     setBusy(false);
   }
 
@@ -562,6 +577,7 @@
     save();
     audio.stopAll(0.4);
     clearConfetti();
+    stopFireworkFinale();
     renderWinners();
     showIdle();
     idleStatus();
@@ -586,7 +602,7 @@
     if (p && p.catch) p.catch(() => {});
   }
 
-  // ---------------------------------------------------------------- confetti: marigold petals, abir, jamara
+  // ---------------------------------------------------------------- Diwali celebration: marigold petals, sparks and ribbons
   function clearConfetti() {
     ui.confetti.textContent = '';
   }
@@ -594,14 +610,14 @@
   function launchConfetti() {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const count = reduce ? 40 : 150;
-    const petals = ['#ff961f', '#ffc22e', '#ffb347', '#ff7a00', '#ffd36c', '#fff4df'];
+    const petals = ['#ff8c1a', '#ffb703', '#ffd166', '#ff4d8d', '#9b5de5', '#00c2a8', '#fff3c4'];
     const H = window.innerHeight;
     const frag = document.createDocumentFragment();
     for (let i = 0; i < count; i += 1) {
       const p = document.createElement('span');
-      const kind = i % 7 === 0 ? 'abir' : i % 11 === 0 ? 'strand' : 'petal';
+      const kind = i % 7 === 0 ? 'spark' : i % 11 === 0 ? 'ribbon' : 'petal';
       p.className = `confetti-piece ${kind}`;
-      p.style.background = kind === 'abir' ? '#e3123f' : kind === 'strand' ? '#e3ea7a' : petals[i % petals.length];
+      p.style.background = kind === 'spark' ? '#fff0a6' : kind === 'ribbon' ? '#9b5de5' : petals[i % petals.length];
       const spin = (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 720);
       if (i % 3 === 0) {
         p.classList.add('rain');
@@ -646,7 +662,11 @@
 
   function buildMala() {
     const R = 216;
-    const parts = ['<circle class="arc-track" r="193"/>', '<circle class="arc" r="193" pathLength="1" transform="rotate(-90)"/>'];
+    const parts = ['<g class="rangoli-petals">'];
+    for (let i = 0; i < 16; i += 1) {
+      parts.push(`<path class="rangoli-petal tone-${i % 3}" d="M0 -239C-9 -230 -11 -214 0 -202C11 -214 9 -230 0 -239Z" transform="rotate(${i * 22.5})"/>`);
+    }
+    parts.push('</g>', '<circle class="arc-track" r="193"/>', '<circle class="arc" r="193" pathLength="1" transform="rotate(-90)"/>');
     for (let i = 0; i < BLOOMS; i += 1) {
       const a = (i / BLOOMS) * Math.PI * 2 - Math.PI / 2; // from 12 o'clock, clockwise
       const yellow = Math.floor(i / 3) % 2 === 1;
@@ -674,7 +694,12 @@
       for (let j = 1; j < count; j += 1) {
         const u = j / count;
         const y = 5 + sag * 4 * u * (1 - u);
-        out.push(`<g transform="translate(${(x0 + u * len).toFixed(1)} ${y.toFixed(1)}) rotate(${(j * 47) % 360})">${blossom(r, Math.floor(j / 4) % 2 === 1)}</g>`);
+        const x = x0 + u * len;
+        out.push(`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(j * 47) % 360})">${blossom(r, Math.floor(j / 4) % 2 === 1)}</g>`);
+        if (j % (small ? 5 : 6) === 0) {
+          const delay = -(((s * 7 + j) % 13) * 0.16);
+          out.push(`<circle class="toran-light" cx="${x.toFixed(1)}" cy="${(y + r * 0.72).toFixed(1)}" r="${(r * 0.31).toFixed(1)}" style="--delay:${delay.toFixed(2)}s"/>`);
+        }
       }
     }
     let bottom = 0;
@@ -700,57 +725,66 @@
     svg.innerHTML = out.join('');
   }
 
-  const KITES = [
-    { cls: 'k1', x: '5%', y: '19vh', w: 'clamp(48px, 6vw, 98px)', a: '#dc143c', b: '#fff4df', c: '#0b3d91', motif: 'sun', tilt: -12, dur: 6.5, delay: -1, side: -1, tail: true },
-    { cls: 'k2', x: '15%', y: '45vh', w: 'clamp(34px, 4vw, 64px)', a: '#ffc22e', b: '#ff961f', c: '#dc143c', motif: 'dot', tilt: 8, dur: 5.2, delay: -3, side: -1, tail: false },
-    { cls: 'k3', x: '82%', y: '27vh', w: 'clamp(50px, 6.4vw, 104px)', a: '#0b3d91', b: '#dc143c', c: '#fff4df', motif: 'moon', tilt: 10, dur: 7.4, delay: -2, side: 1, tail: true },
-    { cls: 'k4', x: '91%', y: '54vh', w: 'clamp(30px, 3.6vw, 58px)', a: '#9bd14b', b: '#f2e66b', c: '#dc143c', motif: 'band', tilt: -6, dur: 5.8, delay: -4, side: 1, tail: false },
-    { cls: 'far', x: '24%', y: '8vh', w: 'clamp(24px, 2.6vw, 42px)', a: '#ff5fa2', b: '#ffc22e', c: '#7a1fa2', motif: 'dot', tilt: 14, dur: 6.1, delay: -0.5, side: -1, tail: false },
+  const FIREWORKS = [
+    { x: '4%', y: '12vh', w: 'clamp(92px, 11vw, 172px)', color: '#ffb703', duration: 6.8, delay: -1.0 },
+    { x: '17%', y: '39vh', w: 'clamp(58px, 6.5vw, 104px)', color: '#ff4d8d', duration: 7.2, delay: -4.6 },
+    { x: '78%', y: '16vh', w: 'clamp(100px, 12vw, 188px)', color: '#9b5de5', duration: 6.4, delay: -3.0 },
+    { x: '91%', y: '48vh', w: 'clamp(52px, 6vw, 96px)', color: '#00c2a8', duration: 7.6, delay: -6.1 },
+    { x: '27%', y: '7vh', w: 'clamp(38px, 4.5vw, 70px)', color: '#ffd166', duration: 5.8, delay: -2.2 },
   ];
 
-  function kiteSVG(k) {
-    const motif = {
-      sun: `<circle cx="50" cy="52" r="13" fill="${k.c}"/><circle cx="50" cy="52" r="6" fill="#ffd36c"/>`,
-      moon: `<path d="M45 39a14 14 0 1 0 14 24a11 11 0 1 1-14-24z" fill="${k.c}"/>`,
-      dot: `<circle cx="50" cy="52" r="10" fill="${k.c}"/>`,
-      band: `<path d="M30 26h40l10 12H20z" fill="${k.c}"/>`,
-    }[k.motif];
-    const tail = k.tail
-      ? `<path d="M50 104q9 14 0 28t0 28 0 28" fill="none" stroke="${k.c}" stroke-width="3" stroke-linecap="round"/>`
-        + `<path d="M44 128l12 4-12 4zM56 156l-12 4 12 4z" fill="${k.a}"/>`
-      : '';
-    return `<svg viewBox="0 0 100 200" xmlns="${SVGNS}">`
-      + `<path d="M50 52Q${50 + k.side * 70} 420 ${50 + k.side * 160} 1500" fill="none" stroke="rgba(255,244,223,.3)" stroke-width="0.9"/>`
-      + `<path d="M50 4l46 48-46 52z" fill="${k.b}"/><path d="M50 4L4 52l46 52z" fill="${k.a}"/>${motif}`
-      + '<path d="M50 4l46 48-46 52L4 52z" fill="none" stroke="rgba(30,10,30,.55)" stroke-width="2"/>'
-      + '<path d="M50 4v100M4 52q46-18 92 0" fill="none" stroke="rgba(40,20,10,.5)" stroke-width="1.6"/>'
-      + `${tail}</svg>`;
+  function buildFireworks() {
+    const burstRays = Array.from({ length: 12 }, (_, i) => {
+      const a = (i / 12) * Math.PI * 2;
+      const inner = i % 2 === 0 ? 17 : 20;
+      const outer = i % 2 === 0 ? 41 : 35;
+      const spark = i % 2 === 0 ? 46 : 40;
+      const x1 = 50 + Math.cos(a) * inner;
+      const y1 = 50 + Math.sin(a) * inner;
+      const x2 = 50 + Math.cos(a) * outer;
+      const y2 = 50 + Math.sin(a) * outer;
+      const cx = 50 + Math.cos(a) * spark;
+      const cy = 50 + Math.sin(a) * spark;
+      return `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}"/>`
+        + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${i % 2 === 0 ? '1.8' : '1.25'}"/>`;
+    }).join('');
+    const echoRays = Array.from({ length: 8 }, (_, i) => {
+      const a = (i / 8) * Math.PI * 2;
+      const x1 = 50 + Math.cos(a) * 10;
+      const y1 = 50 + Math.sin(a) * 10;
+      const x2 = 50 + Math.cos(a) * 27;
+      const y2 = 50 + Math.sin(a) * 27;
+      const cx = 50 + Math.cos(a) * 31;
+      const cy = 50 + Math.sin(a) * 31;
+      return `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}"/>`
+        + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1.1"/>`;
+    }).join('');
+    $('fireworks').innerHTML = FIREWORKS.map((firework, i) => (
+      `<div class="firework firework-${i + 1}" style="--x:${firework.x};--y:${firework.y};--w:${firework.w};`
+      + `--color:${firework.color};--duration:${firework.duration}s;--delay:${firework.delay}s">`
+      + `<svg viewBox="0 0 100 100" xmlns="${SVGNS}" aria-hidden="true">`
+      + '<path class="firework-trail" d="M50 97Q43 79 50 58" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>'
+      + `<g class="firework-echo" transform="rotate(22.5 50 50)" fill="currentColor" stroke="currentColor" stroke-width="1.15" stroke-linecap="round">${echoRays}</g>`
+      + `<g class="firework-burst" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">${burstRays}</g>`
+      + '<circle cx="50" cy="50" r="4" fill="currentColor"/>'
+      + '<circle cx="50" cy="50" r="13" fill="none" stroke="currentColor" stroke-width="1" opacity=".45"/>'
+      + '</svg></div>'
+    )).join('');
   }
 
-  function buildKites() {
-    $('kites').innerHTML = KITES.map((k) => `<div class="kite ${k.cls}" style="--x:${k.x};--y:${k.y};--w:${k.w};--tilt:${k.tilt}deg;--dur:${k.dur}s;--delay:${k.delay}s">${kiteSVG(k)}</div>`).join('');
-  }
-
-  function buildJamara() {
-    let seed = 2083;
-    const rnd = () => {
-      seed = (seed * 16807) % 2147483647;
-      return seed / 2147483647;
-    };
-    const blades = [];
-    for (let i = 0; i < 26; i += 1) {
-      const bx = 44 + rnd() * 52;
-      const tx = bx + (rnd() - 0.5) * 80;
-      const ty = 14 + rnd() * 100;
-      const cx = (bx + tx) / 2 + (rnd() - 0.5) * 30;
-      blades.push(`<path class="blade" style="--d:${(3 + rnd() * 3).toFixed(1)}s;--dl:${(-rnd() * 4).toFixed(1)}s" d="M${bx.toFixed(1)} 200Q${cx.toFixed(1)} ${(ty + 70).toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)}" fill="none" stroke="url(#jam)" stroke-width="${(2.2 + rnd() * 1.8).toFixed(1)}" stroke-linecap="round"/>`);
-    }
-    const pot = '<path d="M28 196q42-10 84 0l-7 42q-35 10-70 0z" fill="url(#pot)"/>'
-      + '<ellipse cx="70" cy="196" rx="44" ry="7" fill="#8a3a1c"/>'
-      + '<path d="M40 214q30 7 60 0" fill="none" stroke="#ffd36c" stroke-width="2" stroke-dasharray="4 4"/>'
-      + '<circle cx="70" cy="226" r="4" fill="#dc143c"/>';
-    const svg = `<svg viewBox="0 0 140 250" xmlns="${SVGNS}">${blades.join('')}${pot}</svg>`;
-    document.querySelectorAll('.jamara-corner').forEach((el) => {
+  function buildDiyas() {
+    const svg = `<svg viewBox="0 0 180 220" xmlns="${SVGNS}" aria-hidden="true">`
+      + '<ellipse class="diya-glow" cx="90" cy="78" rx="72" ry="70" fill="#ffb703" opacity=".2"/>'
+      + '<path class="flame" d="M90 22c23 28 24 51 0 72-24-21-23-44 0-72z" fill="#ff8c1a"/>'
+      + '<path class="flame-core" d="M90 49c10 14 10 25 0 36-10-11-10-22 0-36z" fill="#fff3b0"/>'
+      + '<path d="M87 92h6v25h-6z" fill="#4a1f16"/>'
+      + '<path d="M30 116q60 34 120 0-9 58-60 58t-60-58z" fill="#c44b2d" stroke="#ffb703" stroke-width="4"/>'
+      + '<path d="M43 133q47 22 94 0" fill="none" stroke="#ffd166" stroke-width="4" stroke-linecap="round"/>'
+      + '<path d="M52 160q38 18 76 0l-10 24H62z" fill="#8f2d24"/>'
+      + '<ellipse cx="90" cy="184" rx="34" ry="7" fill="#551b1b" opacity=".65"/>'
+      + '<circle cx="90" cy="146" r="6" fill="#ffd166"/>'
+      + '</svg>';
+    document.querySelectorAll('.diya-corner').forEach((el) => {
       el.innerHTML = svg;
     });
   }
@@ -776,8 +810,8 @@
 
   function init() {
     buildStars();
-    buildKites();
-    buildJamara();
+    buildFireworks();
+    buildDiyas();
     buildGarland();
     buildMala();
     restore();

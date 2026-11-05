@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Dashain Night lucky draw: kites, marigolds and a Panche Baja spin to pick tonight's winners." />
-    <title>Dashain Night Raffle</title>
+    <meta name="description" content="Diwali Night lucky draw: a radiant celebration of light, joy and tonight's winning tickets." />
+    <title>Diwali Night Raffle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;600;700;800&family=Yatra+One&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- shared paints for the marigolds, the countdown arc and the jamara -->
+    <!-- shared paints for the marigolds, rangoli details and countdown arc -->
     <svg class="paints" width="0" height="0" aria-hidden="true" focusable="false">
       <defs>
         <radialGradient id="mO" cx="40%" cy="35%" r="70%">
@@ -38,38 +38,80 @@
           <stop offset="0" stop-color="#7cbf3a" />
           <stop offset="1" stop-color="#2f6b1a" />
         </linearGradient>
-        <linearGradient id="jam" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#fbf6b8" />
-          <stop offset="0.6" stop-color="#e3ea7a" />
-          <stop offset="1" stop-color="#93b83a" />
-        </linearGradient>
-        <linearGradient id="pot" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#c8643a" />
-          <stop offset="1" stop-color="#6e2a14" />
-        </linearGradient>
       </defs>
     </svg>
 
     <div class="sky" aria-hidden="true">
       <div class="stars" id="stars"></div>
-      <div class="moon"></div>
-      <div class="kites" id="kites"></div>
-      <svg class="mountains" viewBox="0 0 1600 320" preserveAspectRatio="none">
-        <path class="range-far" d="M0 320V196l90-38 70 22 90-64 70 40 80-58 70 44 90-82 80 70 80-30 80 50 80-80 80 50 80-34 80 54 80-48 90 58 80-44 80 54 80-40 70 30v124z" />
-        <path class="snow" d="M535 82l25-22 27 24-12-3-15 9-14-8zM855 92l25-22 26 22-11-2-15 8-13-7zM378 116l22-21 22 21-10-2-12 7-11-6zM1018 105l22-20 22 20-10-2-12 6-11-5zM1178 110l22-20 22 20-10-2-12 6-11-5z" />
-        <path class="range-near" d="M0 320V252q200-52 400-12t400-8 400 14 400-22v96z" />
+      <div class="ambient-glow"></div>
+      <div class="fireworks" id="fireworks"></div>
+      <div class="kandils" aria-hidden="true">
+        <svg class="kandil kandil-1" viewBox="0 0 80 180">
+          <path class="kandil-cord" d="M40 0v27" />
+          <path class="kandil-cap" d="M25 27h30l-5 9H30z" />
+          <ellipse class="kandil-light" cx="40" cy="79" rx="27" ry="39" />
+          <path class="kandil-body" d="M40 34 68 66l-9 52-19 15-19-15-9-52z" />
+          <path class="kandil-panel" d="m40 49 13 28-13 31-13-31z" />
+          <path class="kandil-panel" d="M19 68h42M23 112h34" />
+          <path class="kandil-fringe" d="m21 118 7 20 6-12 6 20 6-20 6 12 7-20" />
+          <path class="kandil-tail" d="M40 132v40m-12-38-5 29m29-29 5 29" />
+        </svg>
+        <svg class="kandil kandil-2" viewBox="0 0 80 180">
+          <path class="kandil-cord" d="M40 0v24" />
+          <path class="kandil-cap" d="M23 24h34l-6 10H29z" />
+          <ellipse class="kandil-light" cx="40" cy="77" rx="28" ry="40" />
+          <path class="kandil-body" d="M40 32 69 63l-7 51-22 18-22-18-7-51z" />
+          <path class="kandil-panel" d="m40 47 15 27-15 33-15-33z" />
+          <path class="kandil-panel" d="M17 65h46m-42 45h38" />
+          <path class="kandil-fringe" d="m18 114 8 23 7-12 7 22 7-22 7 12 8-23" />
+          <path class="kandil-tail" d="M40 131v42m-14-38-6 28m34-28 6 28" />
+        </svg>
+        <svg class="kandil kandil-3" viewBox="0 0 80 180">
+          <path class="kandil-cord" d="M40 0v24" />
+          <path class="kandil-cap" d="M23 24h34l-6 10H29z" />
+          <ellipse class="kandil-light" cx="40" cy="77" rx="28" ry="40" />
+          <path class="kandil-body" d="M40 32 69 63l-7 51-22 18-22-18-7-51z" />
+          <path class="kandil-panel" d="m40 47 15 27-15 33-15-33z" />
+          <path class="kandil-panel" d="M17 65h46m-42 45h38" />
+          <path class="kandil-fringe" d="m18 114 8 23 7-12 7 22 7-22 7 12 8-23" />
+          <path class="kandil-tail" d="M40 131v42m-14-38-6 28m34-28 6 28" />
+        </svg>
+        <svg class="kandil kandil-4" viewBox="0 0 80 180">
+          <path class="kandil-cord" d="M40 0v27" />
+          <path class="kandil-cap" d="M25 27h30l-5 9H30z" />
+          <ellipse class="kandil-light" cx="40" cy="79" rx="27" ry="39" />
+          <path class="kandil-body" d="M40 34 68 66l-9 52-19 15-19-15-9-52z" />
+          <path class="kandil-panel" d="m40 49 13 28-13 31-13-31z" />
+          <path class="kandil-panel" d="M19 68h42M23 112h34" />
+          <path class="kandil-fringe" d="m21 118 7 20 6-12 6 20 6-20 6 12 7-20" />
+          <path class="kandil-tail" d="M40 132v40m-12-38-5 29m29-29 5 29" />
+        </svg>
+      </div>
+      <svg class="horizon" viewBox="0 0 1600 320" preserveAspectRatio="none">
+        <ellipse class="haze" cx="800" cy="292" rx="760" ry="130" />
+        <path class="roof-glow" d="M270 219l85-66 85 66M594 225l112-98 112 98M1142 218l92-72 92 72" />
+        <path class="skyline" d="M0 320V266h80v-34h54v34h86v-47h30l105-82 105 82h30v47h77v-41h45l94-112 94 112h45v41h82v-48h30l107-86 107 86h30v48h91v-38h62v38h76v54H0zm318-101h74l-37-39-37 39zm349 6h78l-39-51-39 51zm528-7h78l-39-43-39 43z" />
       </svg>
+      <div class="horizon-lamps" aria-hidden="true">
+        <span class="roof-diya" style="--x:7%;--y:34%;--delay:-0.2s"></span>
+        <span class="roof-diya" style="--x:14%;--y:46%;--delay:-0.8s"></span>
+        <span class="roof-diya" style="--x:22%;--y:27%;--delay:-1.3s"></span>
+        <span class="roof-diya" style="--x:30%;--y:43%;--delay:-1.9s"></span>
+        <span class="roof-diya" style="--x:70%;--y:43%;--delay:-1.1s"></span>
+        <span class="roof-diya" style="--x:78%;--y:27%;--delay:-1.7s"></span>
+        <span class="roof-diya" style="--x:86%;--y:46%;--delay:-0.5s"></span>
+        <span class="roof-diya" style="--x:93%;--y:34%;--delay:-2.2s"></span>
+      </div>
     </div>
 
     <svg class="garland" id="garland" aria-hidden="true"></svg>
-    <div class="jamara-corner jamara-left" aria-hidden="true"></div>
-    <div class="jamara-corner jamara-right" aria-hidden="true"></div>
+    <div class="diya-corner diya-left" aria-hidden="true"></div>
+    <div class="diya-corner diya-right" aria-hidden="true"></div>
 
     <main class="stage">
       <header class="masthead">
-        <p class="greeting" lang="ne">विजया दशमी २०८३ को हार्दिक मंगलमय शुभकामना</p>
-        <h1><span class="t1">Dashain Night</span><span class="t2">Lucky Draw</span></h1>
-        <div class="dhaka" aria-hidden="true"></div>
+        <h1><span class="t1">Diwali Night</span><span class="t2">Lucky Draw</span></h1>
+        <div class="rangoli-rule" aria-hidden="true"></div>
       </header>
 
       <section class="medallion-wrap" aria-label="Draw">
@@ -78,7 +120,6 @@
           <div class="face">
             <p class="face-label" id="faceLabel">Winning Number</p>
             <div class="number" id="winnerDisplay"></div>
-            <p class="number-ne" id="winnerNepali" lang="ne"></p>
           </div>
           <div class="countdown" id="countdown" aria-hidden="true"><span id="countdownValue">10</span></div>
         </div>
@@ -99,11 +140,11 @@
         <div class="settings-grid">
           <label class="field">
             <span>First ticket</span>
-            <input id="startNumber" type="number" inputmode="numeric" step="1" value="80100" />
+            <input id="startNumber" type="number" inputmode="numeric" step="1" value="4504231" />
           </label>
           <label class="field">
             <span>Last ticket</span>
-            <input id="endNumber" type="number" inputmode="numeric" step="1" value="80300" />
+            <input id="endNumber" type="number" inputmode="numeric" step="1" value="4504631" />
           </label>
           <label class="field">
             <span>Spin time</span>
