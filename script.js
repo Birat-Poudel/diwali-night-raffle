@@ -1,6 +1,6 @@
 /* Diwali celebration raffle.
    One fair (crypto) winner from the ticket range, revealed by a spin that speeds up fast, runs flat out, then slows
-   down to land on the winner, timed to the festival music cues in audio-data.js on the Web Audio clock. */
+   down to land on the winner, with countdown ticks timed on the Web Audio clock. */
 (() => {
   'use strict';
 
@@ -186,16 +186,13 @@
     return values;
   }
 
-  // ---------------------------------------------------------------- audio: decoded cues + a synthesized tick
+  // ---------------------------------------------------------------- audio: synthesized countdown ticks only
   const audio = {
     ctx: null,
     out: null,
-    music: null,
     sfx: null,
     tick: null,
-    cues: {},
     live: [],
-    ready: Promise.resolve(),
 
     init() {
       if (this.ctx) return;
@@ -210,19 +207,10 @@
       this.out = c.createGain();
       this.out.gain.value = state.muted ? 0 : 1;
       this.out.connect(c.destination);
-      this.music = c.createGain();
-      this.music.gain.value = 0.9;
-      this.music.connect(this.out);
       this.sfx = c.createGain();
-      this.sfx.gain.value = 0.5;
+      this.sfx.gain.value = 0.65;
       this.sfx.connect(this.out);
       this.tick = makeTick(c);
-      const data = window.RAFFLE_AUDIO || {};
-      this.ready = Promise.all(Object.keys(data).map((name) => decode(c, data[name].data).then((buf) => {
-        // if the decoder kept the AAC encoder delay, skip it so the cues stay on the beat
-        const lead = buf.duration - data[name].dur > 0.02 ? 2112 / 48000 : 0;
-        this.cues[name] = { buf, lead, dur: data[name].dur };
-      }).catch(() => {})));
     },
 
     // must be called from inside a click / key handler
@@ -246,25 +234,6 @@
         const i = this.live.indexOf(item);
         if (i >= 0) this.live.splice(i, 1);
       };
-    },
-
-    play(name, when, { offset = 0, stop = null, fade = 0.15, gain = 1 } = {}) {
-      const cue = this.cues[name];
-      if (!cue) return;
-      const c = this.ctx;
-      const src = c.createBufferSource();
-      const g = c.createGain();
-      src.buffer = cue.buf;
-      g.gain.value = gain;
-      src.connect(g);
-      g.connect(this.music);
-      src.start(when, Math.min(cue.buf.duration - 0.01, cue.lead + offset));
-      if (stop != null) {
-        g.gain.setValueAtTime(gain, Math.max(when, stop - fade));
-        g.gain.linearRampToValueAtTime(0.0001, stop);
-        src.stop(stop + 0.05);
-      }
-      this.keep(src, g);
     },
 
     click(when, gain, rate) {
@@ -296,27 +265,18 @@
       this.live = [];
     },
 
-    // schedule the whole draw; returns the audio time the spin starts at
+    // Schedule one tick for each displayed countdown number, plus the timer-ending tick.
+    // Returns the audio time the spin starts at so animation and sound share one clock.
     playDraw(plan) {
       this.stopAll(0.08);
       const t0 = this.ctx.currentTime + 0.1;
-      const slow = plan.T - plan.tS;
-      this.play('groove', t0, { stop: t0 + plan.tS + 0.1, fade: 0.3 });
-      this.play('sting', t0 + plan.tS);
-      const sus = this.cues.suspense;
-      if (sus) this.play('suspense', t0 + plan.tS, { offset: Math.max(0, sus.dur - slow), gain: 0.95 });
-      this.play('reveal', t0 + plan.T);
-      // clicks on the speed-up and the slow-down (the groove carries the flat-out part); the winner gets the big hit
-      const last = plan.ticks.length - 1;
-      plan.ticks.forEach((t, i) => {
-        if (i === last || (i >= plan.rampEnd && i < plan.slowFrom)) return;
-        if (i >= plan.slowFrom) {
-          const x = (i - plan.slowFrom) / Math.max(1, last - plan.slowFrom);
-          this.click(t0 + t, 0.55 + 0.45 * x, 0.9 + 0.35 * x);
-        } else {
-          this.click(t0 + t, 0.3 + 0.25 * (i / Math.max(1, plan.rampEnd)), 1.15);
-        }
-      });
+      const first = Math.ceil(plan.T);
+      this.click(t0, first <= 3 ? 0.9 : 0.55, first <= 3 ? 1.25 : 0.95);
+      for (let sec = first - 1; sec >= 1; sec -= 1) {
+        const urgent = sec <= 3;
+        this.click(t0 + plan.T - sec, urgent ? 0.9 : 0.55, urgent ? 1.25 : 0.95);
+      }
+      this.click(t0 + plan.T, 1, 1.5);
       return t0;
     },
   };
@@ -333,16 +293,6 @@
         + 0.35 * (Math.random() * 2 - 1) * Math.exp(-t / 0.002);
     }
     return buf;
-  }
-
-  function decode(c, b64) {
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
-    return new Promise((resolve, reject) => {
-      const p = c.decodeAudioData(bytes.buffer, resolve, reject);
-      if (p && typeof p.then === 'function') p.then(resolve, reject);
-    });
   }
 
   // ---------------------------------------------------------------- the display
@@ -481,9 +431,8 @@
     const plan = makePlan(Number(ui.spin.value));
     const values = makeValues(plan.ticks.length, r, winner);
     let withAudio = await unlocking;
-    if (withAudio) await Promise.race([audio.ready, wait(1500)]);
     withAudio = withAudio && audio.ctx.state === 'running';
-    document.body.dataset.audio = withAudio ? `on:${Object.keys(audio.cues).length}` : 'off';
+    document.body.dataset.audio = withAudio ? 'countdown' : 'off';
     const t0 = withAudio ? audio.playDraw(plan) : 0;
     run = {
       plan,
@@ -504,7 +453,7 @@
     run.raf = requestAnimationFrame(frame);
   }
 
-  // seconds into the spin, on the clock the music plays on (minus output latency, so the picture matches the speakers)
+  // Seconds into the spin, on the countdown audio clock (minus output latency so picture and sound stay together).
   function elapsed() {
     const wall = performance.now() / 1000 - run.p0;
     if (!run.withAudio) return wall;
@@ -588,7 +537,7 @@
     if (audio.out) audio.out.gain.setTargetAtTime(muted ? 0 : 1, audio.ctx.currentTime, 0.03);
     ui.soundBtn.classList.toggle('off', muted);
     ui.soundBtn.setAttribute('aria-pressed', String(muted));
-    ui.soundBtn.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music');
+    ui.soundBtn.setAttribute('aria-label', muted ? 'Unmute countdown sound' : 'Mute countdown sound');
     ui.soundBtn.title = muted ? 'Unmute (M)' : 'Mute (M)';
     save();
   }
@@ -861,7 +810,7 @@
       resizeTimer = setTimeout(buildGarland, 150);
     });
 
-    // decode the music now (the context stays suspended until the first click or key press)
+    // Build the countdown tick now (the context stays suspended until the first click or key press).
     audio.init();
     const firstGesture = () => {
       audio.unlock();
